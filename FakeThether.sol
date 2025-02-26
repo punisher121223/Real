@@ -1,33 +1,23 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-contract FakeTether {
-    string public name = "Tether";
-    string public symbol = "USDT";
-    uint8 public decimals = 6;
-    uint256 public totalSupply = 1000000 * (10 ** 6); // 1 میلیون توکن
-    mapping(address => uint256) public balanceOf;
+contract TetherFlash {
+    string public name = "Tether Flash";  // اسم توکن
+    string public symbol = "TFLASH";      // نماد توکن
+    uint8 public decimals = 6;            // تعداد اعشار
+    uint256 public totalSupply;           // کل عرضه
 
-    constructor() public {
-        balanceOf[msg.sender] = totalSupply;
+    mapping(address => uint256) public balanceOf;  // موجودی هر آدرس
+
+    constructor(uint256 initialSupply) {
+        totalSupply = initialSupply * 10 ** decimals;  // عرضه اولیه
+        balanceOf[msg.sender] = totalSupply;           // توکن‌ها به سازنده می‌ره
     }
 
-    function transfer(address _to, uint256 _value) public returns (bool) {
-        require(balanceOf[msg.sender] >= _value, "Not enough tokens");
-        balanceOf[msg.sender] -= _value;
-        balanceOf[_to] += _value;
+    function transfer(address to, uint256 value) public returns (bool) {
+        require(balanceOf[msg.sender] >= value, "Not enough balance");
+        balanceOf[msg.sender] -= value;
+        balanceOf[to] += value;
         return true;
-    }
-
-    // تابع برای دریافت TRX و تبدیل به توکن تقلبی (برای تست)
-    function deposit() public payable {
-        uint256 amount = msg.value; // مقدار TRX ارسالی
-        balanceOf[msg.sender] += amount * 100; // مثلاً هر TRX = 100 توکن
-    }
-
-    // تابع برای برداشت TRX (برای تست)
-    function withdraw(uint256 _value) public {
-        require(balanceOf[msg.sender] >= _value, "Not enough tokens");
-        balanceOf[msg.sender] -= _value;
-        msg.sender.transfer(_value / 100); // هر 100 توکن = 1 TRX
     }
 }
